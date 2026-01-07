@@ -34,6 +34,11 @@
       
       --timer-track: rgba(255, 255, 255, 0.5);
       --loader-bg: rgba(255, 255, 255, 0.9);
+
+      /* Gradasi Glass untuk tombol utama */
+      --btn-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+      --btn-glass-bg: rgba(255, 255, 255, 0.2);
+      --btn-glass-border: rgba(255, 255, 255, 0.5);
     }
 
     /* === Dark Mode Automatis === */
@@ -58,6 +63,11 @@
         
         --timer-track: rgba(255, 255, 255, 0.2);
         --loader-bg: rgba(15, 32, 39, 0.95);
+
+        /* Gradasi Glass Dark Mode */
+        --btn-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+        --btn-glass-bg: rgba(255, 255, 255, 0.1);
+        --btn-glass-border: rgba(255, 255, 255, 0.2);
       }
     }
 
@@ -240,41 +250,47 @@
       transform: scale(1.05);
     }
 
-    /* === Global Button === */
+    /* === Global Button – Diubah menjadi Glassmorphism Gradasi === */
     .btn-main {
       display: block;
       width: 100%;
       padding: 18px;
       font-size: 1.1em;
       font-weight: 700;
-      background: var(--text-main);
-      color: var(--glass-bg);
-      border: none;
+      background: var(--btn-glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: var(--text-main);
+      border: 1px solid var(--btn-glass-border);
       border-radius: 50px;
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      color: #fff; 
-      opacity: 1;
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
       position: relative;
       overflow: hidden;
     }
-    
+
+    .btn-main::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--btn-gradient);
+      border-radius: 50px;
+      z-index: -1;
+    }
+
     .btn-main::after {
       content: '';
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(255,255,255,0.2);
       transform: translateX(-100%);
-      transition: transform 0.3s;
+      transition: transform 0.4s;
+      border-radius: 50px;
     }
     
-    .btn-main:hover::after { transform: translateX(0); }
+    .btn-main:hover::after { transform: translateX(100%); }
     .btn-main:active { transform: scale(0.98); }
-    
-    @media (prefers-color-scheme: light) {
-        .btn-main { background: #2f3542; }
-    }
 
     .btn-main:disabled {
       opacity: 0.5;
@@ -592,7 +608,6 @@
       el.classList.add('selected');
       config.count = num;
       getEl('btn-start').disabled = false;
-      // Button styling update logic moved to CSS specific class if needed, but rely on opacity
       getEl('btn-start').style.opacity = '1'; 
       getEl('btn-start').style.cursor = 'pointer';
     }
