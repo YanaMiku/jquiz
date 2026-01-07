@@ -117,6 +117,109 @@
       position: relative;
     }
 
+    /* Exit Button */
+    .exit-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--card-blur);
+      -webkit-backdrop-filter: var(--card-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 1000;
+      color: var(--text-main);
+      font-size: 1.2em;
+      transition: all 0.3s;
+      box-shadow: var(--glass-shadow);
+    }
+
+    .exit-btn:hover {
+      background: var(--option-hover);
+      transform: scale(1.1);
+    }
+
+    /* Confirmation Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--card-blur);
+      -webkit-backdrop-filter: var(--card-blur);
+      border-radius: 25px;
+      padding: 30px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: var(--glass-shadow);
+      border: 1px solid var(--glass-border);
+      text-align: center;
+      animation: fadeInUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .modal-title {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    .modal-text {
+      color: var(--text-sub);
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .modal-btn {
+      padding: 12px 25px;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      flex: 1;
+      max-width: 120px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .modal-cancel {
+      background: var(--option-bg);
+      color: var(--text-main);
+    }
+
+    .modal-confirm {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .modal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
     /* Glass Card Style */
     .card {
       background: var(--glass-bg);
@@ -216,6 +319,63 @@
       margin-bottom: 40px;
       padding: 0 20px;
       line-height: 1.6;
+    }
+
+    /* === Mode Selection Grid === */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin: 25px 0 30px;
+    }
+
+    .mode-btn {
+      padding: 20px 15px;
+      background: var(--option-bg);
+      border: 1px solid var(--option-border);
+      border-radius: 20px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+      color: var(--text-main);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-btn i {
+      font-size: 1.8em;
+      margin-bottom: 5px;
+    }
+
+    .mode-btn span {
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+
+    .mode-btn small {
+      font-size: 0.8em;
+      color: var(--text-sub);
+      font-weight: 400;
+    }
+
+    .mode-btn:hover {
+      background: var(--option-hover);
+      transform: translateY(-3px);
+    }
+
+    .mode-btn.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 8px 20px rgba(255, 107, 129, 0.3);
+      transform: scale(1.05);
+    }
+
+    .mode-btn.selected small {
+      color: rgba(255, 255, 255, 0.9);
     }
 
     /* === Selection Grid === */
@@ -441,9 +601,12 @@
     @media (max-width: 480px) {
       .container { padding: 15px; }
       .card { padding: 25px 20px; border-radius: 25px; }
+      .exit-btn { top: 15px; left: 15px; width: 45px; height: 45px; font-size: 1.1em; }
       h1 { font-size: 1.6em; }
       .landing-title { font-size: 1.8em; }
       .hero-visual { width: 160px; height: 160px; }
+      .mode-grid { grid-template-columns: 1fr; gap: 12px; }
+      .mode-btn { padding: 18px 12px; }
       .timer-container, .timer-circle { width: 44px; height: 44px; }
       .timer-circle circle { cx: 22; cy: 22; r: 19; }
       .timer-text { font-size: 1em; }
@@ -452,16 +615,30 @@
       #question-text { font-size: 1.5em; margin: 10px 0 25px; }
       .option-item { padding: 16px; }
       .option-item span { font-size: 1em; }
+      .modal-card { padding: 25px 20px; }
+      .modal-buttons { flex-direction: column; }
+      .modal-btn { max-width: 100%; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Audio -->
-  <audio id="sfx-click" src="https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3"></audio>
-  <audio id="sfx-correct" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3"></audio>
-  <audio id="sfx-wrong" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-bass-buzzer-948.mp3"></audio>
-  <audio id="sfx-end" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.mp3"></audio>
+  <!-- Exit Button -->
+  <div class="exit-btn" onclick="showExitModal()">
+    <i class="fas fa-times"></i>
+  </div>
+
+  <!-- Exit Confirmation Modal -->
+  <div class="modal-overlay" id="exitModal">
+    <div class="modal-card">
+      <div class="modal-title">Keluar Quiz?</div>
+      <div class="modal-text">Apakah Anda yakin ingin keluar? Semua progres akan hilang.</div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-cancel" onclick="hideExitModal()">Batal</button>
+        <button class="modal-btn modal-confirm" onclick="confirmExit()">Keluar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Loading -->
   <div id="loading-overlay">
@@ -472,32 +649,67 @@
 
   <div class="container">
     
-    <!-- Screen 0: Landing Page (NEW) -->
+    <!-- Screen 0: Landing Page -->
     <div id="screen-landing" class="card">
       <div class="landing-content">
         <div class="hero-visual">
           <span class="floating-kanji k1">日</span>
           <span class="floating-kanji k2">夢</span>
           <span class="floating-kanji k3">学</span>
-          <!-- Menggunakan gambar 3D Abstract berkualitas tinggi dari Unsplash -->
           <img src="https://explore-live.s3.eu-west-1.amazonaws.com/medialibraries/explore/explore-media/destinations/asia/japan/japan-banner.jpg" class="hero-3d-img" alt="3D Illustration">
         </div>
         <h1 class="landing-title">Master JLPT N5</h1>
         <p class="landing-desc">Pelajari Hiragana, Katakana, dan Kanji dengan antarmuka modern yang imersif.</p>
         
-        <button class="btn-main" onclick="goToSelection()">
+        <button class="btn-main" onclick="goToModeSelection()">
           Mulai Belajar <i class="fas fa-arrow-right btn-icon"></i>
         </button>
       </div>
     </div>
 
-    <!-- Screen 1: Selection -->
-    <div id="screen-select" class="card" style="display:none;">
+    <!-- Screen 1: Mode Selection -->
+    <div id="screen-mode" class="card" style="display:none;">
       <div style="display:flex; align-items:center; margin-bottom:10px;">
         <i class="fas fa-chevron-left" style="font-size:1.2em; cursor:pointer; color:var(--text-sub);" onclick="backToLanding()"></i>
-        <h1 style="flex:1; font-size:1.5em; margin:0;">Konfigurasi</h1>
+        <h1 style="flex:1; font-size:1.5em; margin:0;">Pilih Mode</h1>
       </div>
-      <p class="subtitle">Pilih target jumlah soal harianmu</p>
+      <p class="subtitle">Pilih jenis huruf yang ingin Anda pelajari</p>
+      
+      <div class="mode-grid">
+        <div class="mode-btn" onclick="selectMode('hiragana', this)">
+          <i class="fas fa-language"></i>
+          <span>Hiragana</span>
+          <small>Huruf fonetik Jepang</small>
+        </div>
+        <div class="mode-btn" onclick="selectMode('katakana', this)">
+          <i class="fas fa-font"></i>
+          <span>Katakana</span>
+          <small>Huruf asing dan teknis</small>
+        </div>
+        <div class="mode-btn" onclick="selectMode('kanji', this)">
+          <i class="fas fa-mountain"></i>
+          <span>Kanji</span>
+          <small>Karakter Tionghoa</small>
+        </div>
+        <div class="mode-btn" onclick="selectMode('campuran', this)">
+          <i class="fas fa-random"></i>
+          <span>Campuran</span>
+          <small>Semua jenis huruf</small>
+        </div>
+      </div>
+
+      <button id="btn-to-count" class="btn-main" disabled onclick="goToCountSelection()">
+        Pilih Jumlah Soal <i class="fas fa-forward btn-icon"></i>
+      </button>
+    </div>
+
+    <!-- Screen 2: Count Selection -->
+    <div id="screen-count" class="card" style="display:none;">
+      <div style="display:flex; align-items:center; margin-bottom:10px;">
+        <i class="fas fa-chevron-left" style="font-size:1.2em; cursor:pointer; color:var(--text-sub);" onclick="backToModeSelection()"></i>
+        <h1 style="flex:1; font-size:1.5em; margin:0;">Jumlah Soal</h1>
+      </div>
+      <p class="subtitle" id="mode-indicator">Pilih target jumlah soal harianmu</p>
       
       <div class="options-grid">
         <div class="option-btn" onclick="selectCount(15, this)">15</div>
@@ -513,7 +725,7 @@
       </button>
     </div>
 
-    <!-- Screen 2: Quiz -->
+    <!-- Screen 3: Quiz -->
     <div id="screen-quiz" class="card" style="display:none;">
       <div class="quiz-header">
         <div class="question-badge" id="q-progress">1 / 15</div>
@@ -534,7 +746,7 @@
       </button>
     </div>
 
-    <!-- Screen 3: Result -->
+    <!-- Screen 4: Result -->
     <div id="screen-result" class="card" style="display:none;">
       <h1 style="font-size:1.5em; margin-bottom:0;">Selesai!</h1>
       <div class="score-big" id="res-score">0</div>
@@ -565,7 +777,11 @@
   <script>
     // --- Config & State ---
     const API_URL = "https://api.nekolabs.web.id/text.gen/gemini/2.5-flash-lite?text=";
-    let config = { count: 0 };
+    let config = { 
+      mode: '', 
+      count: 0 
+    };
+    
     let state = {
       questions: [],
       currentIdx: 0,
@@ -576,47 +792,78 @@
       answeredCount: 0
     };
 
-    // --- Audio ---
-    const sfx = {
-      click: document.getElementById('sfx-click'),
-      correct: document.getElementById('sfx-correct'),
-      wrong: document.getElementById('sfx-wrong'),
-      end: document.getElementById('sfx-end')
-    };
-    const play = (audio) => { audio.currentTime = 0; audio.play().catch(()=>{}); };
-
     // --- UI Helpers ---
     const getEl = (id) => document.getElementById(id);
+    const exitBtn = document.querySelector('.exit-btn');
     
+    // Exit Modal Functions
+    function showExitModal() {
+      getEl('exitModal').style.display = 'flex';
+    }
+
+    function hideExitModal() {
+      getEl('exitModal').style.display = 'none';
+    }
+
+    function confirmExit() {
+      hideExitModal();
+      exitBtn.style.display = 'none';
+      getEl('screen-quiz').style.display = 'none';
+      getEl('screen-landing').style.display = 'block';
+      clearInterval(state.timer);
+    }
+
     // Navigation Functions
-    function goToSelection() {
-      play(sfx.click);
+    function goToModeSelection() {
       getEl('screen-landing').style.display = 'none';
-      getEl('screen-select').style.display = 'block';
+      getEl('screen-mode').style.display = 'block';
     }
 
     function backToLanding() {
-      play(sfx.click);
-      getEl('screen-select').style.display = 'none';
+      getEl('screen-mode').style.display = 'none';
       getEl('screen-landing').style.display = 'block';
+    }
+
+    function goToCountSelection() {
+      getEl('screen-mode').style.display = 'none';
+      getEl('screen-count').style.display = 'block';
+      
+      // Update mode indicator text
+      const modeText = config.mode === 'hiragana' ? 'Hiragana' :
+                      config.mode === 'katakana' ? 'Katakana' :
+                      config.mode === 'kanji' ? 'Kanji' : 'Campuran';
+      getEl('mode-indicator').textContent = `Mode: ${modeText} - Pilih jumlah soal`;
+    }
+
+    function backToModeSelection() {
+      getEl('screen-count').style.display = 'none';
+      getEl('screen-mode').style.display = 'block';
+      config.count = 0;
+      getEl('btn-start').disabled = true;
+      document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    }
+
+    // Select Mode
+    function selectMode(mode, el) {
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      el.classList.add('selected');
+      config.mode = mode;
+      getEl('btn-to-count').disabled = false;
     }
 
     // Select Count
     function selectCount(num, el) {
-      play(sfx.click);
       document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
       el.classList.add('selected');
       config.count = num;
       getEl('btn-start').disabled = false;
-      getEl('btn-start').style.opacity = '1'; 
-      getEl('btn-start').style.cursor = 'pointer';
     }
 
     // --- Core Logic ---
     async function startQuiz() {
-      play(sfx.click);
-      getEl('screen-select').style.display = 'none';
+      getEl('screen-count').style.display = 'none';
       getEl('loading-overlay').style.display = 'flex';
+      exitBtn.style.display = 'flex';
       
       try {
         await generateQuestions();
@@ -630,9 +877,13 @@
     }
 
     async function generateQuestions() {
-      const prompt = `Buatkan ${config.count} soal quiz JLPT N5 (Hiragana, Katakana, Kanji). 
+      const modeText = config.mode === 'hiragana' ? 'Hiragana' :
+                      config.mode === 'katakana' ? 'Katakana' :
+                      config.mode === 'kanji' ? 'Kanji' : 'Hiragana, Katakana, dan Kanji';
+                      
+      const prompt = `Buatkan ${config.count} soal quiz JLPT N5 tentang ${modeText}. 
         Format JSON array murni tanpa markdown. 
-        Setiap objek: { "type": "kanji/hiragana/katakana", "question": "pertanyaan pendek", "options": ["A","B","C","D"] (semua unik), "answer": "jawaban benar" }.
+        Setiap objek: { "type": "${config.mode}", "question": "pertanyaan pendek", "options": ["A","B","C","D"] (semua unik), "answer": "jawaban benar" }.
         Pastikan options unik.`;
         
       getEl('loading-sub').textContent = "Mengambil data...";
@@ -727,10 +978,8 @@
       if(selected === correct) {
         el.classList.add('correct');
         state.score++;
-        play(sfx.correct);
       } else {
         el.classList.add('wrong');
-        play(sfx.wrong);
         items.forEach(item => {
           if(item.innerText === correct) item.classList.add('correct');
         });
@@ -749,7 +998,6 @@
 
     function handleTimeUp() {
       getEl('options-container').classList.add('locked');
-      play(sfx.wrong);
       
       const q = state.questions[state.currentIdx];
       document.querySelectorAll('.option-item').forEach(item => {
@@ -770,7 +1018,7 @@
     function finishQuiz() {
       getEl('screen-quiz').style.display = 'none';
       getEl('screen-result').style.display = 'block';
-      play(sfx.end);
+      exitBtn.style.display = 'none';
 
       getEl('res-score').textContent = Math.round((state.score / state.questions.length) * 100);
       getEl('res-correct').textContent = state.score;
