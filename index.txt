@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Quiz JLPT N5 Glassmorphism</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    /* === Variabel Tema (Light Mode Default) === */
+    :root {
+      /* Palette Warna */
+      --primary: #ff6b81;
+      --success: #2ed573;
+      --danger: #ff4757;
+      
+      /* Background Gradient (Colorful untuk efek Glass) */
+      --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+      
+      /* Glass Effect Variables */
+      --glass-bg: rgba(255, 255, 255, 0.25);
+      --glass-border: rgba(255, 255, 255, 0.6);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+      --card-blur: blur(16px);
+      
+      /* Text Colors */
+      --text-main: #2f3542;
+      --text-sub: #57606f;
+      
+      /* Elements */
+      --option-bg: rgba(255, 255, 255, 0.5);
+      --option-border: rgba(255, 255, 255, 0.6);
+      --option-hover: rgba(255, 255, 255, 0.8);
+      
+      --timer-track: rgba(255, 255, 255, 0.5);
+      --loader-bg: rgba(255, 255, 255, 0.9);
+
+      /* Gradasi Glass untuk tombol utama */
+      --btn-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+      --btn-glass-bg: rgba(255, 255, 255, 0.2);
+      --btn-glass-border: rgba(255, 255, 255, 0.5);
+    }
+
+    /* === Dark Mode Automatis === */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        /* Gradient Gelap yang Elegan */
+        --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+        
+        /* Glass Effect Dark */
+        --glass-bg: rgba(0, 0, 0, 0.35);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        
+        /* Text Colors Dark */
+        --text-main: #f1f2f6;
+        --text-sub: #a4b0be;
+        
+        /* Elements Dark */
+        --option-bg: rgba(255, 255, 255, 0.05);
+        --option-border: rgba(255, 255, 255, 0.1);
+        --option-hover: rgba(255, 255, 255, 0.15);
+        
+        --timer-track: rgba(255, 255, 255, 0.2);
+        --loader-bg: rgba(15, 32, 39, 0.95);
+
+        /* Gradasi Glass Dark Mode */
+        --btn-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+        --btn-glass-bg: rgba(255, 255, 255, 0.1);
+        --btn-glass-border: rgba(255, 255, 255, 0.2);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      color: var(--text-main);
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Background Shapes */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      z-index: -1;
+      filter: blur(80px);
+      opacity: 0.6;
+    }
+    body::before { top: -50px; left: -50px; background: var(--primary); }
+    body::after { bottom: -50px; right: -50px; background: #70a1ff; }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Glass Card Style */
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--card-blur);
+      -webkit-backdrop-filter: var(--card-blur);
+      border-radius: 30px;
+      padding: 30px;
+      width: 100%;
+      box-shadow: var(--glass-shadow);
+      border: 1px solid var(--glass-border);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+    h1 {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 2em;
+      text-align: center;
+      margin: 0 0 5px;
+      color: var(--text-main);
+      font-weight: 800;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--text-sub);
+      font-size: 0.95em;
+      margin: 0 0 30px;
+      font-weight: 500;
+    }
+
+    /* === Landing Page Specific === */
+    .landing-content {
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .hero-visual {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 30px;
+    }
+
+    .hero-3d-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 40px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      animation: float 6s ease-in-out infinite;
+      transform: rotate(-5deg);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-15px) rotate(-5deg); }
+    }
+
+    .floating-kanji {
+      position: absolute;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 900;
+      color: var(--text-main);
+      opacity: 0.2;
+      animation: floatKanji 8s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    .k1 { font-size: 4em; top: -20px; left: -30px; animation-delay: 0s; }
+    .k2 { font-size: 3em; bottom: 0; right: -40px; animation-delay: 2s; }
+    .k3 { font-size: 2em; top: 40%; left: -50px; animation-delay: 4s; }
+
+    @keyframes floatKanji {
+      0%, 100% { transform: translateY(0) rotate(10deg); }
+      50% { transform: translateY(-20px) rotate(-10deg); }
+    }
+
+    .landing-title {
+      font-size: 2.2em;
+      line-height: 1.2;
+      margin-bottom: 10px;
+      background: linear-gradient(45deg, var(--text-main), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .landing-desc {
+      font-size: 1em;
+      color: var(--text-sub);
+      margin-bottom: 40px;
+      padding: 0 20px;
+      line-height: 1.6;
+    }
+
+    /* === Selection Grid === */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .option-btn {
+      padding: 15px;
+      font-size: 1.2em;
+      font-weight: 700;
+      background: var(--option-bg);
+      border: 1px solid var(--option-border);
+      border-radius: 16px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      color: var(--text-main);
+      backdrop-filter: blur(4px);
+    }
+
+    .option-btn:hover { background: var(--option-hover); }
+
+    .option-btn.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transform: scale(1.05);
+    }
+
+    /* === Global Button – Diubah menjadi Glassmorphism Gradasi === */
+    .btn-main {
+      display: block;
+      width: 100%;
+      padding: 18px;
+      font-size: 1.1em;
+      font-weight: 700;
+      background: var(--btn-glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: var(--text-main);
+      border: 1px solid var(--btn-glass-border);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-main::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--btn-gradient);
+      border-radius: 50px;
+      z-index: -1;
+    }
+
+    .btn-main::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255,255,255,0.2);
+      transform: translateX(-100%);
+      transition: transform 0.4s;
+      border-radius: 50px;
+    }
+    
+    .btn-main:hover::after { transform: translateX(100%); }
+    .btn-main:active { transform: scale(0.98); }
+
+    .btn-main:disabled {
+      opacity: 0.5;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-icon { margin-left: 10px; }
+
+    /* === Quiz & Other Styles === */
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--loader-bg);
+      backdrop-filter: blur(20px);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--glass-border);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #loading-overlay p {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 0;
+    }
+    #loading-overlay span {
+      font-size: 0.9em;
+      color: var(--text-sub);
+      margin-top: 8px;
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding: 0 5px;
+    }
+
+    .question-badge {
+      background: var(--option-bg);
+      border: 1px solid var(--option-border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .timer-container { position: relative; width: 50px; height: 50px; }
+    .timer-circle { transform: rotate(-90deg); width: 50px; height: 50px; }
+    .timer-circle circle { cx: 25; cy: 25; r: 22; fill: none; stroke-width: 4; }
+    .bg-ring { stroke: var(--timer-track); }
+    .progress-ring {
+      stroke: var(--primary);
+      stroke-dasharray: 138;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 2px var(--primary));
+    }
+    .timer-text {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.1em;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    #question-text {
+      font-size: 1.8em;
+      text-align: center;
+      margin: 10px 0 30px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text-main);
+    }
+
+    .options-list { display: flex; flex-direction: column; gap: 12px; }
+    .option-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 18px 20px;
+      background: var(--option-bg);
+      border: 1px solid var(--option-border);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-main);
+    }
+    .option-item:active { transform: scale(0.98); background: var(--option-hover); }
+    .option-item input { display: none; }
+    .option-item span { font-size: 1.1em; font-weight: 500; margin-left: 10px; flex: 1; }
+    
+    .option-item.correct {
+      background: rgba(46, 213, 115, 0.2);
+      border-color: var(--success);
+      color: var(--text-main);
+      box-shadow: 0 0 15px rgba(46, 213, 115, 0.3);
+    }
+    .option-item.wrong {
+      background: rgba(255, 71, 87, 0.2);
+      border-color: var(--danger);
+      color: var(--text-main);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .option-item.correct { background: rgba(46, 213, 115, 0.4); }
+        .option-item.wrong { background: rgba(255, 71, 87, 0.4); }
+    }
+
+    .score-big {
+      font-size: 4em;
+      font-weight: 800;
+      background: linear-gradient(45deg, var(--primary), #ffa502);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+      margin: 20px 0 0;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    .score-label { text-align: center; color: var(--text-sub); font-size: 1em; margin-bottom: 30px; }
+    .stats-mini { display: flex; justify-content: center; gap: 30px; margin-bottom: 30px; }
+    .stat-box { text-align: center; }
+    .stat-box strong { display: block; font-size: 1.4em; color: var(--text-main); }
+    .stat-box small { color: var(--text-sub); font-size: 0.8em; }
+
+    @media (max-width: 480px) {
+      .container { padding: 15px; }
+      .card { padding: 25px 20px; border-radius: 25px; }
+      h1 { font-size: 1.6em; }
+      .landing-title { font-size: 1.8em; }
+      .hero-visual { width: 160px; height: 160px; }
+      .timer-container, .timer-circle { width: 44px; height: 44px; }
+      .timer-circle circle { cx: 22; cy: 22; r: 19; }
+      .timer-text { font-size: 1em; }
+      .options-grid { gap: 10px; }
+      .option-btn { padding: 12px; font-size: 1em; }
+      #question-text { font-size: 1.5em; margin: 10px 0 25px; }
+      .option-item { padding: 16px; }
+      .option-item span { font-size: 1em; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Audio -->
+  <audio id="sfx-click" src="https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3"></audio>
+  <audio id="sfx-correct" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3"></audio>
+  <audio id="sfx-wrong" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-bass-buzzer-948.mp3"></audio>
+  <audio id="sfx-end" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.mp3"></audio>
+
+  <!-- Loading -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <p id="loading-main">Memuat Soal...</p>
+    <span id="loading-sub">Menghubungi AI</span>
+  </div>
+
+  <div class="container">
+    
+    <!-- Screen 0: Landing Page (NEW) -->
+    <div id="screen-landing" class="card">
+      <div class="landing-content">
+        <div class="hero-visual">
+          <span class="floating-kanji k1">日</span>
+          <span class="floating-kanji k2">夢</span>
+          <span class="floating-kanji k3">学</span>
+          <!-- Menggunakan gambar 3D Abstract berkualitas tinggi dari Unsplash -->
+          <img src="https://explore-live.s3.eu-west-1.amazonaws.com/medialibraries/explore/explore-media/destinations/asia/japan/japan-banner.jpg" class="hero-3d-img" alt="3D Illustration">
+        </div>
+        <h1 class="landing-title">Master JLPT N5</h1>
+        <p class="landing-desc">Pelajari Hiragana, Katakana, dan Kanji dengan antarmuka modern yang imersif.</p>
+        
+        <button class="btn-main" onclick="goToSelection()">
+          Mulai Belajar <i class="fas fa-arrow-right btn-icon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Screen 1: Selection -->
+    <div id="screen-select" class="card" style="display:none;">
+      <div style="display:flex; align-items:center; margin-bottom:10px;">
+        <i class="fas fa-chevron-left" style="font-size:1.2em; cursor:pointer; color:var(--text-sub);" onclick="backToLanding()"></i>
+        <h1 style="flex:1; font-size:1.5em; margin:0;">Konfigurasi</h1>
+      </div>
+      <p class="subtitle">Pilih target jumlah soal harianmu</p>
+      
+      <div class="options-grid">
+        <div class="option-btn" onclick="selectCount(15, this)">15</div>
+        <div class="option-btn" onclick="selectCount(30, this)">30</div>
+        <div class="option-btn" onclick="selectCount(45, this)">45</div>
+        <div class="option-btn" onclick="selectCount(60, this)">60</div>
+        <div class="option-btn" onclick="selectCount(75, this)">75</div>
+        <div class="option-btn" onclick="selectCount(90, this)">90</div>
+      </div>
+
+      <button id="btn-start" class="btn-main" disabled onclick="startQuiz()">
+        Generate Soal <i class="fas fa-bolt btn-icon"></i>
+      </button>
+    </div>
+
+    <!-- Screen 2: Quiz -->
+    <div id="screen-quiz" class="card" style="display:none;">
+      <div class="quiz-header">
+        <div class="question-badge" id="q-progress">1 / 15</div>
+        <div class="timer-container">
+          <svg class="timer-circle">
+            <circle class="bg-ring" />
+            <circle class="progress-ring" />
+          </svg>
+          <div class="timer-text" id="timer-val">30</div>
+        </div>
+      </div>
+
+      <h2 id="question-text">Loading...</h2>
+      <div class="options-list" id="options-container"></div>
+      
+      <button id="btn-next" class="btn-main" style="display:none; background:var(--primary);" onclick="nextQuestion()">
+        Lanjut <i class="fas fa-forward btn-icon"></i>
+      </button>
+    </div>
+
+    <!-- Screen 3: Result -->
+    <div id="screen-result" class="card" style="display:none;">
+      <h1 style="font-size:1.5em; margin-bottom:0;">Selesai!</h1>
+      <div class="score-big" id="res-score">0</div>
+      <p class="score-label" id="res-msg">Poin Kamu</p>
+
+      <div class="stats-mini">
+        <div class="stat-box">
+          <strong id="res-correct" style="color:var(--success)">0</strong>
+          <small>Benar</small>
+        </div>
+        <div class="stat-box">
+          <strong id="res-wrong" style="color:var(--danger)">0</strong>
+          <small>Salah</small>
+        </div>
+        <div class="stat-box">
+          <strong id="res-time">0s</strong>
+          <small>Avg</small>
+        </div>
+      </div>
+
+      <button class="btn-main" onclick="location.reload()">
+        <i class="fas fa-redo btn-icon"></i> Main Lagi
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // --- Config & State ---
+    const API_URL = "https://api.nekolabs.web.id/text.gen/gemini/2.5-flash-lite?text=";
+    let config = { count: 0 };
+    let state = {
+      questions: [],
+      currentIdx: 0,
+      score: 0,
+      timer: null,
+      timeLeft: 30,
+      totalTime: 0,
+      answeredCount: 0
+    };
+
+    // --- Audio ---
+    const sfx = {
+      click: document.getElementById('sfx-click'),
+      correct: document.getElementById('sfx-correct'),
+      wrong: document.getElementById('sfx-wrong'),
+      end: document.getElementById('sfx-end')
+    };
+    const play = (audio) => { audio.currentTime = 0; audio.play().catch(()=>{}); };
+
+    // --- UI Helpers ---
+    const getEl = (id) => document.getElementById(id);
+    
+    // Navigation Functions
+    function goToSelection() {
+      play(sfx.click);
+      getEl('screen-landing').style.display = 'none';
+      getEl('screen-select').style.display = 'block';
+    }
+
+    function backToLanding() {
+      play(sfx.click);
+      getEl('screen-select').style.display = 'none';
+      getEl('screen-landing').style.display = 'block';
+    }
+
+    // Select Count
+    function selectCount(num, el) {
+      play(sfx.click);
+      document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+      el.classList.add('selected');
+      config.count = num;
+      getEl('btn-start').disabled = false;
+      getEl('btn-start').style.opacity = '1'; 
+      getEl('btn-start').style.cursor = 'pointer';
+    }
+
+    // --- Core Logic ---
+    async function startQuiz() {
+      play(sfx.click);
+      getEl('screen-select').style.display = 'none';
+      getEl('loading-overlay').style.display = 'flex';
+      
+      try {
+        await generateQuestions();
+        getEl('loading-overlay').style.display = 'none';
+        getEl('screen-quiz').style.display = 'block';
+        renderQuestion();
+      } catch (e) {
+        alert("Gagal memuat soal. Silakan coba lagi.");
+        location.reload();
+      }
+    }
+
+    async function generateQuestions() {
+      const prompt = `Buatkan ${config.count} soal quiz JLPT N5 (Hiragana, Katakana, Kanji). 
+        Format JSON array murni tanpa markdown. 
+        Setiap objek: { "type": "kanji/hiragana/katakana", "question": "pertanyaan pendek", "options": ["A","B","C","D"] (semua unik), "answer": "jawaban benar" }.
+        Pastikan options unik.`;
+        
+      getEl('loading-sub').textContent = "Mengambil data...";
+      
+      let collected = [];
+      let attempts = 0;
+      
+      while(collected.length < config.count && attempts < 5) {
+        attempts++;
+        getEl('loading-sub').textContent = `Memproses... (${collected.length}/${config.count})`;
+        
+        try {
+          const res = await fetch(API_URL + encodeURIComponent(prompt));
+          const data = await res.json();
+          if(!data.success) continue;
+          
+          let cleanJson = data.result.replace(/```json|```/g, '').trim();
+          if(cleanJson.startsWith('{')) { 
+             const parsed = JSON.parse(cleanJson);
+             if(parsed.questions) collected = collected.concat(parsed.questions);
+          } else if (cleanJson.startsWith('[')) {
+             collected = collected.concat(JSON.parse(cleanJson));
+          }
+          
+          collected = collected.filter((v,i,a)=>a.findIndex(t=>(t.question===v.question))===i);
+        } catch(e) { console.error(e); }
+      }
+
+      state.questions = collected.slice(0, config.count);
+      if(state.questions.length === 0) {
+        throw new Error("Empty Data");
+      }
+    }
+
+    function renderQuestion() {
+      const q = state.questions[state.currentIdx];
+      
+      getEl('q-progress').textContent = `${state.currentIdx + 1} / ${state.questions.length}`;
+      getEl('question-text').textContent = q.question;
+      
+      const container = getEl('options-container');
+      container.innerHTML = '';
+      getEl('btn-next').style.display = 'none';
+
+      q.options.forEach(opt => {
+        const div = document.createElement('div');
+        div.className = 'option-item';
+        div.innerHTML = `<span>${opt}</span>`;
+        div.onclick = () => checkAnswer(opt, q.answer, div);
+        container.appendChild(div);
+      });
+
+      startTimer();
+    }
+
+    function startTimer() {
+      clearInterval(state.timer);
+      state.timeLeft = 30;
+      updateTimerUI(30);
+      
+      state.timer = setInterval(() => {
+        state.timeLeft--;
+        updateTimerUI(state.timeLeft);
+        if(state.timeLeft <= 0) {
+          clearInterval(state.timer);
+          handleTimeUp();
+        }
+      }, 1000);
+    }
+
+    function updateTimerUI(sec) {
+      getEl('timer-val').textContent = sec;
+      const circle = document.querySelector('.progress-ring');
+      const r = window.innerWidth < 480 ? 19 : 22;
+      const c = 2 * Math.PI * r;
+      const offset = c - ((sec / 30) * c);
+      circle.style.strokeDasharray = c;
+      circle.style.strokeDashoffset = offset;
+    }
+
+    function checkAnswer(selected, correct, el) {
+      if(getEl('options-container').classList.contains('locked')) return;
+      
+      clearInterval(state.timer);
+      getEl('options-container').classList.add('locked');
+      
+      state.answeredCount++;
+      state.totalTime += (30 - state.timeLeft);
+
+      const items = document.querySelectorAll('.option-item');
+      
+      if(selected === correct) {
+        el.classList.add('correct');
+        state.score++;
+        play(sfx.correct);
+      } else {
+        el.classList.add('wrong');
+        play(sfx.wrong);
+        items.forEach(item => {
+          if(item.innerText === correct) item.classList.add('correct');
+        });
+      }
+
+      setTimeout(() => {
+        if(state.currentIdx < state.questions.length - 1) {
+          state.currentIdx++;
+          getEl('options-container').classList.remove('locked');
+          renderQuestion();
+        } else {
+          finishQuiz();
+        }
+      }, 1500);
+    }
+
+    function handleTimeUp() {
+      getEl('options-container').classList.add('locked');
+      play(sfx.wrong);
+      
+      const q = state.questions[state.currentIdx];
+      document.querySelectorAll('.option-item').forEach(item => {
+        if(item.innerText === q.answer) item.classList.add('correct');
+      });
+
+      setTimeout(() => {
+        if(state.currentIdx < state.questions.length - 1) {
+          state.currentIdx++;
+          getEl('options-container').classList.remove('locked');
+          renderQuestion();
+        } else {
+          finishQuiz();
+        }
+      }, 1500);
+    }
+
+    function finishQuiz() {
+      getEl('screen-quiz').style.display = 'none';
+      getEl('screen-result').style.display = 'block';
+      play(sfx.end);
+
+      getEl('res-score').textContent = Math.round((state.score / state.questions.length) * 100);
+      getEl('res-correct').textContent = state.score;
+      getEl('res-wrong').textContent = state.questions.length - state.score;
+      
+      const avg = state.answeredCount > 0 ? Math.round(state.totalTime / state.answeredCount) : 0;
+      getEl('res-time').textContent = avg + 's';
+
+      const pct = (state.score / state.questions.length) * 100;
+      getEl('res-msg').textContent = pct >= 80 ? "Hebat Sekali! 🎉" : (pct >= 60 ? "Kerja Bagus! 👍" : "Jangan Menyerah! 💪");
+    }
+  </script>
+</body>
+</html>
