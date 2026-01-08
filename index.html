@@ -859,6 +859,34 @@
       getEl('btn-start').disabled = false;
     }
 
+    // --- Fungsi Utilitas ---
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function shuffleOptions(question) {
+      const allOptions = [...question.options];
+      const correctAnswer = question.answer;
+      
+      // Pastikan jawaban benar ada dalam options
+      if (!allOptions.includes(correctAnswer)) {
+        allOptions[Math.floor(Math.random() * allOptions.length)] = correctAnswer;
+      }
+      
+      // Acak urutan options
+      const shuffled = shuffleArray(allOptions);
+      
+      return {
+        ...question,
+        options: shuffled,
+        answer: correctAnswer // Jawaban tetap sama
+      };
+    }
+
     // --- Core Logic ---
     async function startQuiz() {
       getEl('screen-count').style.display = 'none';
@@ -880,20 +908,31 @@
       const modeText = config.mode === 'hiragana' ? 'Hiragana' :
                       config.mode === 'katakana' ? 'Katakana' :
                       config.mode === 'kanji' ? 'Kanji' : 'Hiragana, Katakana, dan Kanji';
-                      
-      const prompt = `Buatkan ${config.count} soal quiz JLPT N5 tentang ${modeText}. 
-        Format JSON array murni tanpa markdown. 
-        Setiap objek: { "type": "${config.mode}", "question": "pertanyaan pendek", "options": ["A","B","C","D"] (semua unik), "answer": "jawaban benar" }.
-        Pastikan options unik.`;
-        
-      getEl('loading-sub').textContent = "Mengambil data...";
       
       let collected = [];
       let attempts = 0;
+      const maxQuestionsPerRequest = 5; // Maksimal 5 soal per request
       
-      while(collected.length < config.count && attempts < 5) {
-        attempts++;
-        getEl('loading-sub').textContent = `Memproses... (${collected.length}/${config.count})`;
+      // Hitung berapa batch yang diperlukan
+      const totalBatches = Math.ceil(config.count / maxQuestionsPerRequest);
+      
+      for (let batch = 1; batch <= totalBatches; batch++) {
+        const questionsInThisBatch = Math.min(maxQuestionsPerRequest, config.count - collected.length);
+        
+        if (questionsInThisBatch <= 0) break;
+        
+        const prompt = `Buatkan ${questionsInThisBatch} soal quiz JLPT N5 yang SULIT tentang ${modeText}. 
+          Soal harus menantang dan menguji pemahaman mendalam.
+          Format JSON array murni tanpa markdown. 
+          Setiap objek: { 
+            "type": "${config.mode}", 
+            "question": "pertanyaan pendek tapi sulit", 
+            "options": ["A","B","C","D"] (semua unik dan mengecoh), 
+            "answer": "jawaban benar yang spesifik" 
+          }.
+          Pastikan options unik dan mengecoh.`;
+        
+        getEl('loading-sub').textContent = `Membuat soal sulit... (${collected.length}/${config.count})`;
         
         try {
           const res = await fetch(API_URL + encodeURIComponent(prompt));
@@ -901,21 +940,43 @@
           if(!data.success) continue;
           
           let cleanJson = data.result.replace(/```json|```/g, '').trim();
+          let batchQuestions = [];
+          
           if(cleanJson.startsWith('{')) { 
              const parsed = JSON.parse(cleanJson);
-             if(parsed.questions) collected = collected.concat(parsed.questions);
+             if(parsed.questions) batchQuestions = parsed.questions;
           } else if (cleanJson.startsWith('[')) {
-             collected = collected.concat(JSON.parse(cleanJson));
+             batchQuestions = JSON.parse(cleanJson);
           }
           
-          collected = collected.filter((v,i,a)=>a.findIndex(t=>(t.question===v.question))===i);
-        } catch(e) { console.error(e); }
+          // Tambahkan ke koleksi dengan menghindari duplikat
+          batchQuestions.forEach(q => {
+            if (!collected.some(existing => existing.question === q.question)) {
+              collected.push(q);
+            }
+          });
+          
+          // Delay antar request untuk menghindari rate limit
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+        } catch(e) { 
+          console.error("Error batch", batch, e);
+          attempts++;
+          if (attempts > 3) {
+            throw new Error("Terlalu banyak gagal request");
+          }
+        }
       }
 
-      state.questions = collected.slice(0, config.count);
-      if(state.questions.length === 0) {
-        throw new Error("Empty Data");
+      if (collected.length === 0) {
+        throw new Error("Tidak dapat membuat soal");
       }
+
+      // Acak urutan soal dan acak options untuk setiap soal
+      collected = shuffleArray(collected).slice(0, config.count);
+      collected = collected.map(shuffleOptions);
+      
+      state.questions = collected;
     }
 
     function renderQuestion() {
@@ -1028,7 +1089,9 @@
       getEl('res-time').textContent = avg + 's';
 
       const pct = (state.score / state.questions.length) * 100;
-      getEl('res-msg').textContent = pct >= 80 ? "Hebat Sekali! 🎉" : (pct >= 60 ? "Kerja Bagus! 👍" : "Jangan Menyerah! 💪");
+      getEl('res-msg').textContent = pct >= 80 ? "Hebat Sekali! Soal sulit tapi kamu jago! 🎉" : 
+                                     (pct >= 60 ? "Lumayan! Soalnya memang sulit! 👍" : 
+                                     "Jangan menyerah! Soalnya memang sulit! 💪");
     }
   </script>
 </body>
