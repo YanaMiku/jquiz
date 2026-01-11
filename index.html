@@ -949,7 +949,9 @@
       timer: null,
       timeLeft: 30,
       totalTime: 0,
-      answeredCount: 0
+      answeredCount: 0,
+      sessionId: '',
+      questionHistory: [] // Untuk melacak soal yang sudah dibuat
     };
 
     // --- UI Helpers ---
@@ -1075,24 +1077,13 @@
       };
     }
 
-    // --- Core Logic ---
-    async function startQuiz() {
-      getEl('screen-count').style.display = 'none';
-      getEl('loading-overlay').style.display = 'flex';
-      exitBtn.style.display = 'flex';
-      
-      try {
-        await generateQuestions();
-        getEl('loading-overlay').style.display = 'none';
-        getEl('screen-quiz').style.display = 'block';
-        renderQuestion();
-      } catch (e) {
-        alert("Gagal memuat soal. Silakan coba lagi.");
-        location.reload();
-      }
+    // Generate session ID unik
+    function generateSessionId() {
+      return Date.now().toString(36) + Math.random().toString(36).substring(2);
     }
 
-    async function generateQuestions() {
+    // Fungsi untuk meminta soal dari AI dengan sessionId
+    async function requestQuestionsFromAI(count, existingQuestions = []) {
       const modeText = config.mode === 'hiragana' ? 'Hiragana' :
                       config.mode === 'katakana' ? 'Katakana' :
                       config.mode === 'kanji' ? 'Kanji' : 'Hiragana, Katakana, dan Kanji';
@@ -1110,87 +1101,198 @@
           break;
       }
       
+      // Siapkan daftar soal yang sudah ada untuk menghindari duplikat
+      let existingQuestionsText = '';
+      if (existingQuestions.length > 0) {
+        const existingSamples = existingQuestions.slice(-3); // Ambil 3 soal terakhir sebagai contoh
+        existingQuestionsText = `\n\nJANGAN BUAT SOAL YANG SAMA DENGAN BERIKUT:\n${JSON.stringify(existingSamples, null, 2)}`;
+      }
+      
+      const prompt = `Buatkan ${count} soal quiz JLPT N5 tentang ${modeText} dengan tingkat kesulitan "${config.difficulty}".
+        KESULITAN: ${difficultyDesc}
+        SESSION ID: ${state.sessionId}
+        
+        FORMAT SETIAP SOAL:
+        {
+          "character": "[karakter/kalimat dalam ${modeText}]",
+          "options": ["pilihan romaji 1", "pilihan romaji 2", "pilihan romaji 3", "pilihan romaji 4"],
+          "answer": "jawaban romaji yang benar",
+          "type": "${config.mode}",
+          "difficulty": "${config.difficulty}"
+        }
+        
+        ATURAN:
+        1. Untuk soal ${config.difficulty}: ${difficultyDesc}
+        2. Pilihan jawaban harus berupa ROMAJI (huruf latin)
+        3. Semua pilihan harus unik dan mengecoh
+        4. Jawaban harus tepat sesuai dengan karakter/kalimat
+        5. Untuk mode campuran, acak antara hiragana, katakana, dan kanji
+        6. JANGAN membuat soal yang sama dengan yang sudah ada${existingQuestionsText}
+        
+        Format output: JSON array murni tanpa markdown atau teks lain.`;
+      
+      getEl('loading-sub').textContent = `Meminta ${count} soal ${config.difficulty}...`;
+      
+      try {
+        const res = await fetch(API_URL + encodeURIComponent(prompt));
+        const data = await res.json();
+        
+        if(!data.success) {
+          throw new Error("API tidak merespons dengan sukses");
+        }
+        
+        let cleanJson = data.result.replace(/```json|```/g, '').trim();
+        let questions = [];
+        
+        if(cleanJson.startsWith('[')) {
+           questions = JSON.parse(cleanJson);
+        } else if (cleanJson.startsWith('{')) {
+           const parsed = JSON.parse(cleanJson);
+           if(parsed.questions) questions = parsed.questions;
+           else if (parsed.results) questions = parsed.results;
+           else if (parsed.data) questions = parsed.data;
+        }
+        
+        // Validasi setiap soal
+        const validQuestions = questions.filter(q => {
+          return q.character && 
+                 q.options && 
+                 Array.isArray(q.options) && 
+                 q.options.length === 4 &&
+                 q.answer && 
+                 q.type && 
+                 q.difficulty;
+        });
+        
+        return validQuestions;
+        
+      } catch(e) { 
+        console.error("Error request AI:", e);
+        return [];
+      }
+    }
+
+    // --- Core Logic ---
+    async function startQuiz() {
+      getEl('screen-count').style.display = 'none';
+      getEl('loading-overlay').style.display = 'flex';
+      exitBtn.style.display = 'flex';
+      
+      // Generate session ID baru
+      state.sessionId = generateSessionId();
+      state.questionHistory = [];
+      
+      try {
+        await generateQuestions();
+        getEl('loading-overlay').style.display = 'none';
+        getEl('screen-quiz').style.display = 'block';
+        renderQuestion();
+      } catch (e) {
+        alert("Gagal memuat soal. Silakan coba lagi.");
+        console.error(e);
+        location.reload();
+      }
+    }
+
+    async function generateQuestions() {
+      const targetCount = config.count;
       let collected = [];
       let attempts = 0;
-      const maxQuestionsPerRequest = 5;
+      const maxAttempts = 5; // Maksimal 5 kali percobaan
       
-      // Hitung berapa batch yang diperlukan
-      const totalBatches = Math.ceil(config.count / maxQuestionsPerRequest);
+      // Batch pertama: coba buat semua soal sekaligus
+      let remaining = targetCount;
+      let batchSize = Math.min(10, targetCount); // Batch pertama maksimal 10 soal
       
-      for (let batch = 1; batch <= totalBatches; batch++) {
-        const questionsInThisBatch = Math.min(maxQuestionsPerRequest, config.count - collected.length);
+      while (collected.length < targetCount && attempts < maxAttempts) {
+        const needed = targetCount - collected.length;
+        const requestSize = Math.min(batchSize, needed);
         
-        if (questionsInThisBatch <= 0) break;
+        getEl('loading-sub').textContent = `Membuat soal ${config.difficulty}... (${collected.length}/${targetCount})`;
         
-        const prompt = `Buatkan ${questionsInThisBatch} soal quiz JLPT N5 tentang ${modeText} dengan tingkat kesulitan "${config.difficulty}".
-          KESULITAN: ${difficultyDesc}
-          
-          FORMAT SETIAP SOAL:
-          {
-            "character": "[karakter/kalimat dalam ${modeText}]",
-            "options": ["pilihan romaji 1", "pilihan romaji 2", "pilihan romaji 3", "pilihan romaji 4"],
-            "answer": "jawaban romaji yang benar",
-            "type": "${config.mode}",
-            "difficulty": "${config.difficulty}"
-          }
-          
-          ATURAN:
-          1. Untuk soal ${config.difficulty}: ${difficultyDesc}
-          2. Pilihan jawaban harus berupa ROMAJI (huruf latin)
-          3. Semua pilihan harus unik dan mengecoh
-          4. Jawaban harus tepat sesuai dengan karakter/kalimat
-          5. Untuk mode campuran, acak antara hiragana, katakana, dan kanji
-          
-          Format output: JSON array murni tanpa markdown atau teks lain.`;
+        const newQuestions = await requestQuestionsFromAI(requestSize, state.questionHistory);
         
-        getEl('loading-sub').textContent = `Membuat soal ${config.difficulty}... (${collected.length}/${config.count})`;
+        if (newQuestions.length === 0) {
+          attempts++;
+          console.log(`Percobaan ${attempts} gagal, mencoba lagi...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
         
-        try {
-          const res = await fetch(API_URL + encodeURIComponent(prompt));
-          const data = await res.json();
-          if(!data.success) continue;
-          
-          let cleanJson = data.result.replace(/```json|```/g, '').trim();
-          let batchQuestions = [];
-          
-          if(cleanJson.startsWith('[')) {
-             batchQuestions = JSON.parse(cleanJson);
-          } else if (cleanJson.startsWith('{')) {
-             const parsed = JSON.parse(cleanJson);
-             if(parsed.questions) batchQuestions = parsed.questions;
-             else if (parsed.results) batchQuestions = parsed.results;
-          }
-          
-          // Validasi dan tambahkan ke koleksi
-          batchQuestions.forEach(q => {
-            if (q.character && q.options && q.answer && q.type && q.difficulty) {
-              if (!collected.some(existing => existing.character === q.character)) {
-                collected.push(q);
-              }
-            }
-          });
+        // Filter duplikat berdasarkan karakter
+        const uniqueQuestions = newQuestions.filter(q => {
+          // Cek apakah karakter sudah ada di collected
+          const isDuplicate = collected.some(existing => 
+            existing.character === q.character || 
+            existing.question === q.character
+          );
+          return !isDuplicate;
+        });
+        
+        // Tambahkan ke koleksi
+        collected.push(...uniqueQuestions);
+        
+        // Update history untuk request berikutnya
+        state.questionHistory.push(...uniqueQuestions);
+        
+        // Jika masih kurang, kurangi batch size untuk request berikutnya
+        if (collected.length < targetCount) {
+          batchSize = Math.min(5, targetCount - collected.length); // Batch berikutnya lebih kecil
+          attempts = 0; // Reset attempts untuk batch baru
           
           // Delay antar request
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-        } catch(e) { 
-          console.error("Error batch", batch, e);
-          attempts++;
-          if (attempts > 3) {
-            throw new Error("Terlalu banyak gagal request");
-          }
+          await new Promise(resolve => setTimeout(resolve, 1500));
         }
       }
-
-      if (collected.length === 0) {
-        throw new Error("Tidak dapat membuat soal");
+      
+      // Jika masih kurang setelah beberapa percobaan, buat sisanya satu per satu
+      if (collected.length < targetCount) {
+        const remainingCount = targetCount - collected.length;
+        console.log(`Masih kurang ${remainingCount} soal, membuat satu per satu...`);
+        
+        for (let i = 0; i < remainingCount; i++) {
+          getEl('loading-sub').textContent = `Membuat soal ${config.difficulty}... (${collected.length}/${targetCount})`;
+          
+          const singleQuestion = await requestQuestionsFromAI(1, state.questionHistory);
+          
+          if (singleQuestion.length > 0) {
+            const q = singleQuestion[0];
+            
+            // Cek duplikat
+            const isDuplicate = collected.some(existing => 
+              existing.character === q.character || 
+              existing.question === q.character
+            );
+            
+            if (!isDuplicate) {
+              collected.push(q);
+              state.questionHistory.push(q);
+            }
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
-
-      // Pastikan jumlah soal sesuai yang diminta
-      collected = shuffleArray(collected).slice(0, config.count);
+      
+      if (collected.length === 0) {
+        throw new Error("Tidak dapat membuat soal sama sekali");
+      }
+      
+      // Jika masih kurang dari target, tapi sudah maksimal, terima apa adanya
+      if (collected.length < targetCount) {
+        console.warn(`Hanya berhasil membuat ${collected.length} dari ${targetCount} soal`);
+      }
+      
+      // Acak urutan soal dan options
+      collected = shuffleArray(collected);
       collected = collected.map(shuffleOptions);
       
       state.questions = collected;
+      
+      // Update UI untuk menampilkan jumlah soal yang sebenarnya
+      if (collected.length !== config.count) {
+        console.log(`Quiz akan menggunakan ${collected.length} soal (dari ${config.count} yang diminta)`);
+      }
     }
 
     function renderQuestion() {
