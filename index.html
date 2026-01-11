@@ -13,6 +13,9 @@
       --primary: #ff6b81;
       --success: #2ed573;
       --danger: #ff4757;
+      --easy: #2ed573;
+      --medium: #ffa502;
+      --hard: #ff4757;
       
       /* Background Gradient (Colorful untuk efek Glass) */
       --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
@@ -378,6 +381,69 @@
       color: rgba(255, 255, 255, 0.9);
     }
 
+    /* === Difficulty Selection Grid === */
+    .difficulty-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 25px 0 30px;
+    }
+
+    .difficulty-btn {
+      padding: 18px 10px;
+      background: var(--option-bg);
+      border: 1px solid var(--option-border);
+      border-radius: 16px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+      color: var(--text-main);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .difficulty-btn i {
+      font-size: 1.5em;
+    }
+
+    .difficulty-btn span {
+      font-weight: 600;
+      font-size: 1em;
+    }
+
+    .difficulty-btn small {
+      font-size: 0.75em;
+      color: var(--text-sub);
+      font-weight: 400;
+    }
+
+    .difficulty-btn:hover {
+      background: var(--option-hover);
+      transform: translateY(-2px);
+    }
+
+    .difficulty-btn.selected {
+      color: white;
+      border-color: currentColor;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      transform: scale(1.05);
+    }
+
+    .difficulty-btn.easy.selected {
+      background: var(--easy);
+    }
+
+    .difficulty-btn.medium.selected {
+      background: var(--medium);
+    }
+
+    .difficulty-btn.hard.selected {
+      background: var(--hard);
+    }
+
     /* === Selection Grid === */
     .options-grid {
       display: grid;
@@ -517,6 +583,33 @@
       color: var(--text-main);
     }
 
+    .difficulty-badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75em;
+      font-weight: 600;
+      margin-left: 8px;
+      text-transform: uppercase;
+    }
+
+    .difficulty-badge.easy {
+      background: rgba(46, 213, 115, 0.2);
+      color: var(--easy);
+      border: 1px solid rgba(46, 213, 115, 0.3);
+    }
+
+    .difficulty-badge.medium {
+      background: rgba(255, 165, 2, 0.2);
+      color: var(--medium);
+      border: 1px solid rgba(255, 165, 2, 0.3);
+    }
+
+    .difficulty-badge.hard {
+      background: rgba(255, 71, 87, 0.2);
+      color: var(--hard);
+      border: 1px solid rgba(255, 71, 87, 0.3);
+    }
+
     .timer-container { position: relative; width: 50px; height: 50px; }
     .timer-circle { transform: rotate(-90deg); width: 50px; height: 50px; }
     .timer-circle circle { cx: 25; cy: 25; r: 22; fill: none; stroke-width: 4; }
@@ -538,13 +631,32 @@
       color: var(--text-main);
     }
 
-    #question-text {
-      font-size: 1.8em;
-      text-align: center;
+    .question-container {
       margin: 10px 0 30px;
-      font-weight: 600;
-      line-height: 1.3;
+      text-align: center;
+    }
+
+    .question-label {
+      font-size: 1em;
+      color: var(--text-sub);
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .question-character {
+      font-size: 3em;
+      font-weight: 700;
       color: var(--text-main);
+      margin: 10px 0;
+      font-family: 'Noto Sans JP', sans-serif;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .question-text {
+      font-size: 1.3em;
+      color: var(--text-main);
+      font-weight: 600;
+      line-height: 1.4;
     }
 
     .options-list { display: flex; flex-direction: column; gap: 12px; }
@@ -607,12 +719,15 @@
       .hero-visual { width: 160px; height: 160px; }
       .mode-grid { grid-template-columns: 1fr; gap: 12px; }
       .mode-btn { padding: 18px 12px; }
+      .difficulty-grid { grid-template-columns: 1fr; gap: 10px; }
+      .difficulty-btn { padding: 16px 10px; }
       .timer-container, .timer-circle { width: 44px; height: 44px; }
       .timer-circle circle { cx: 22; cy: 22; r: 19; }
       .timer-text { font-size: 1em; }
       .options-grid { gap: 10px; }
       .option-btn { padding: 12px; font-size: 1em; }
-      #question-text { font-size: 1.5em; margin: 10px 0 25px; }
+      .question-character { font-size: 2.5em; }
+      .question-text { font-size: 1.1em; }
       .option-item { padding: 16px; }
       .option-item span { font-size: 1em; }
       .modal-card { padding: 25px 20px; }
@@ -659,7 +774,7 @@
           <img src="https://explore-live.s3.eu-west-1.amazonaws.com/medialibraries/explore/explore-media/destinations/asia/japan/japan-banner.jpg" class="hero-3d-img" alt="3D Illustration">
         </div>
         <h1 class="landing-title">Master JLPT N5</h1>
-        <p class="landing-desc">Pelajari Hiragana, Katakana, dan Kanji dengan antarmuka modern yang imersif.</p>
+        <p class="landing-desc">Pelajari Hiragana, Katakana, dan Kanji dengan sistem 3 tingkat kesulitan yang imersif.</p>
         
         <button class="btn-main" onclick="goToModeSelection()">
           Mulai Belajar <i class="fas fa-arrow-right btn-icon"></i>
@@ -698,6 +813,37 @@
         </div>
       </div>
 
+      <button id="btn-to-difficulty" class="btn-main" disabled onclick="goToDifficultySelection()">
+        Pilih Tingkat Kesulitan <i class="fas fa-forward btn-icon"></i>
+      </button>
+    </div>
+
+    <!-- Screen 1.5: Difficulty Selection -->
+    <div id="screen-difficulty" class="card" style="display:none;">
+      <div style="display:flex; align-items:center; margin-bottom:10px;">
+        <i class="fas fa-chevron-left" style="font-size:1.2em; cursor:pointer; color:var(--text-sub);" onclick="backToModeSelection()"></i>
+        <h1 style="flex:1; font-size:1.5em; margin:0;">Tingkat Kesulitan</h1>
+      </div>
+      <p class="subtitle" id="mode-indicator">Pilih tingkat kesulitan soal</p>
+      
+      <div class="difficulty-grid">
+        <div class="difficulty-btn easy" onclick="selectDifficulty('easy', this)">
+          <i class="fas fa-seedling"></i>
+          <span>Mudah</span>
+          <small>1 huruf dasar</small>
+        </div>
+        <div class="difficulty-btn medium" onclick="selectDifficulty('medium', this)">
+          <i class="fas fa-balance-scale"></i>
+          <span>Sedang</span>
+          <small>1-2 huruf dengan variasi</small>
+        </div>
+        <div class="difficulty-btn hard" onclick="selectDifficulty('hard', this)">
+          <i class="fas fa-fire"></i>
+          <span>Sulit</span>
+          <small>Kalimat lengkap</small>
+        </div>
+      </div>
+
       <button id="btn-to-count" class="btn-main" disabled onclick="goToCountSelection()">
         Pilih Jumlah Soal <i class="fas fa-forward btn-icon"></i>
       </button>
@@ -706,10 +852,10 @@
     <!-- Screen 2: Count Selection -->
     <div id="screen-count" class="card" style="display:none;">
       <div style="display:flex; align-items:center; margin-bottom:10px;">
-        <i class="fas fa-chevron-left" style="font-size:1.2em; cursor:pointer; color:var(--text-sub);" onclick="backToModeSelection()"></i>
+        <i class="fas fa-chevron-left" style="font-size:1.2em; cursor:pointer; color:var(--text-sub);" onclick="backToDifficultySelection()"></i>
         <h1 style="flex:1; font-size:1.5em; margin:0;">Jumlah Soal</h1>
       </div>
-      <p class="subtitle" id="mode-indicator">Pilih target jumlah soal harianmu</p>
+      <p class="subtitle" id="full-indicator">Pilih target jumlah soal harianmu</p>
       
       <div class="options-grid">
         <div class="option-btn" onclick="selectCount(15, this)">15</div>
@@ -728,7 +874,7 @@
     <!-- Screen 3: Quiz -->
     <div id="screen-quiz" class="card" style="display:none;">
       <div class="quiz-header">
-        <div class="question-badge" id="q-progress">1 / 15</div>
+        <div class="question-badge" id="q-progress">1 / 15 <span class="difficulty-badge easy" id="difficulty-badge">Mudah</span></div>
         <div class="timer-container">
           <svg class="timer-circle">
             <circle class="bg-ring" />
@@ -738,7 +884,12 @@
         </div>
       </div>
 
-      <h2 id="question-text">Loading...</h2>
+      <div class="question-container">
+        <div class="question-label">Question:</div>
+        <div class="question-character" id="question-character">あ</div>
+        <div class="question-text" id="question-text">Which Romaji is correct for the Hiragana character above?</div>
+      </div>
+      
       <div class="options-list" id="options-container"></div>
       
       <button id="btn-next" class="btn-main" style="display:none; background:var(--primary);" onclick="nextQuestion()">
@@ -779,6 +930,7 @@
     const API_URL = "https://api.nekolabs.web.id/text.gen/gemini/2.5-flash-lite?text=";
     let config = { 
       mode: '', 
+      difficulty: '',
       count: 0 
     };
     
@@ -824,20 +976,46 @@
       getEl('screen-landing').style.display = 'block';
     }
 
-    function goToCountSelection() {
+    function goToDifficultySelection() {
       getEl('screen-mode').style.display = 'none';
-      getEl('screen-count').style.display = 'block';
+      getEl('screen-difficulty').style.display = 'block';
       
       // Update mode indicator text
       const modeText = config.mode === 'hiragana' ? 'Hiragana' :
                       config.mode === 'katakana' ? 'Katakana' :
                       config.mode === 'kanji' ? 'Kanji' : 'Campuran';
-      getEl('mode-indicator').textContent = `Mode: ${modeText} - Pilih jumlah soal`;
+      getEl('mode-indicator').textContent = `Mode: ${modeText} - Pilih tingkat kesulitan`;
     }
 
     function backToModeSelection() {
-      getEl('screen-count').style.display = 'none';
+      getEl('screen-difficulty').style.display = 'none';
       getEl('screen-mode').style.display = 'block';
+      config.difficulty = '';
+      config.count = 0;
+      getEl('btn-to-count').disabled = true;
+      getEl('btn-start').disabled = true;
+      document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    }
+
+    function goToCountSelection() {
+      getEl('screen-difficulty').style.display = 'none';
+      getEl('screen-count').style.display = 'block';
+      
+      // Update full indicator text
+      const modeText = config.mode === 'hiragana' ? 'Hiragana' :
+                      config.mode === 'katakana' ? 'Katakana' :
+                      config.mode === 'kanji' ? 'Kanji' : 'Campuran';
+      
+      const difficultyText = config.difficulty === 'easy' ? 'Mudah' :
+                           config.difficulty === 'medium' ? 'Sedang' : 'Sulit';
+      
+      getEl('full-indicator').textContent = `Mode: ${modeText} - Tingkat: ${difficultyText} - Pilih jumlah soal`;
+    }
+
+    function backToDifficultySelection() {
+      getEl('screen-count').style.display = 'none';
+      getEl('screen-difficulty').style.display = 'block';
       config.count = 0;
       getEl('btn-start').disabled = true;
       document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
@@ -848,6 +1026,14 @@
       document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
       el.classList.add('selected');
       config.mode = mode;
+      getEl('btn-to-difficulty').disabled = false;
+    }
+
+    // Select Difficulty
+    function selectDifficulty(difficulty, el) {
+      document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+      el.classList.add('selected');
+      config.difficulty = difficulty;
       getEl('btn-to-count').disabled = false;
     }
 
@@ -909,9 +1095,27 @@
                       config.mode === 'katakana' ? 'Katakana' :
                       config.mode === 'kanji' ? 'Kanji' : 'Hiragana, Katakana, dan Kanji';
       
+      const difficultyText = config.difficulty === 'easy' ? 'MUDAH' :
+                           config.difficulty === 'medium' ? 'SEDANG' : 'SULIT';
+      
+      // Tentukan format soal berdasarkan kesulitan
+      let formatInstruction = '';
+      let questionTemplate = '';
+      
+      if (config.difficulty === 'easy') {
+        formatInstruction = `Setiap soal hanya tentang 1 huruf ${modeText} dasar (tanpa dakuon, handakuon, yoon, atau variasi lainnya). Contoh untuk Hiragana: あ, い, う, え, お. Contoh untuk Katakana: ア, イ, ウ, エ, オ. Contoh untuk Kanji: 日, 月, 火, 水, 木.`;
+        questionTemplate = `Question: [character]\nWhich Romaji is correct for the ${modeText} character above?`;
+      } else if (config.difficulty === 'medium') {
+        formatInstruction = `Setiap soal tentang 1-2 huruf ${modeText} DENGAN variasi seperti dakuon, handakuon, yoon, atau kombinasi. Contoh untuk Hiragana: が, きゅ, ぱ, じ. Contoh untuk Katakana: ガ, キュ, パ, ジ. Contoh untuk Kanji: 水曜日, 大きい, 食べる.`;
+        questionTemplate = `Question: [character]\nWhich Romaji is correct for the ${modeText} character(s) above?`;
+      } else if (config.difficulty === 'hard') {
+        formatInstruction = `Setiap soal berupa 1 kalimat lengkap dalam ${modeText}. Kalimat harus pendek (3-7 kata) dan sesuai untuk level JLPT N5. Contoh untuk Hiragana: きょうはいいてんきです。 Contoh untuk Katakana: ミュージックをききます。 Contoh untuk Kanji: 今日は月曜日です。`;
+        questionTemplate = `Question: [sentence]\nWhich Romaji is correct for the ${modeText} sentence above?`;
+      }
+      
       let collected = [];
       let attempts = 0;
-      const maxQuestionsPerRequest = 5; // Maksimal 5 soal per request
+      const maxQuestionsPerRequest = 5;
       
       // Hitung berapa batch yang diperlukan
       const totalBatches = Math.ceil(config.count / maxQuestionsPerRequest);
@@ -921,18 +1125,31 @@
         
         if (questionsInThisBatch <= 0) break;
         
-        const prompt = `Buatkan ${questionsInThisBatch} soal quiz JLPT N5 yang SULIT tentang ${modeText}. 
-          Soal harus menantang dan menguji pemahaman mendalam.
+        const prompt = `Buatkan ${questionsInThisBatch} soal quiz JLPT N5 tingkat ${difficultyText} tentang ${modeText}. 
+          ${formatInstruction}
+          
+          Format soal harus seperti ini:
+          ${questionTemplate}
+          
+          Persyaratan penting:
+          1. Options harus 4 pilihan Romaji yang MENGEcoh dan logis
+          2. Jawaban harus tepat dan akurat
+          3. Semua options harus berupa Romaji yang valid
+          4. Hindari options yang terlalu mudah ditebak
+          
           Format JSON array murni tanpa markdown. 
           Setiap objek: { 
             "type": "${config.mode}", 
-            "question": "pertanyaan pendek tapi sulit", 
-            "options": ["A","B","C","D"] (semua unik dan mengecoh), 
-            "answer": "jawaban benar yang spesifik" 
+            "difficulty": "${config.difficulty}",
+            "character": "karakter atau kalimat ${modeText}",
+            "question": "Which Romaji is correct for the ${modeText} ${config.difficulty === 'hard' ? 'sentence' : 'character'} above?",
+            "options": ["romaji_a","romaji_b","romaji_c","romaji_d"] (semua harus berbeda dan mengecoh),
+            "answer": "jawaban benar dalam romaji" 
           }.
-          Pastikan options unik dan mengecoh.`;
+          
+          Pastikan options unik, mengecoh, dan sesuai dengan konteks ${modeText} level ${difficultyText}.`;
         
-        getEl('loading-sub').textContent = `Membuat soal sulit... (${collected.length}/${config.count})`;
+        getEl('loading-sub').textContent = `Membuat soal ${difficultyText.toLowerCase()}... (${collected.length}/${config.count})`;
         
         try {
           const res = await fetch(API_URL + encodeURIComponent(prompt));
@@ -951,7 +1168,7 @@
           
           // Tambahkan ke koleksi dengan menghindari duplikat
           batchQuestions.forEach(q => {
-            if (!collected.some(existing => existing.question === q.question)) {
+            if (!collected.some(existing => existing.character === q.character)) {
               collected.push(q);
             }
           });
@@ -983,6 +1200,14 @@
       const q = state.questions[state.currentIdx];
       
       getEl('q-progress').textContent = `${state.currentIdx + 1} / ${state.questions.length}`;
+      
+      // Update difficulty badge
+      const difficultyBadge = getEl('difficulty-badge');
+      difficultyBadge.textContent = q.difficulty === 'easy' ? 'Mudah' : q.difficulty === 'medium' ? 'Sedang' : 'Sulit';
+      difficultyBadge.className = 'difficulty-badge ' + q.difficulty;
+      
+      // Update question character and text
+      getEl('question-character').textContent = q.character;
       getEl('question-text').textContent = q.question;
       
       const container = getEl('options-container');
@@ -997,13 +1222,22 @@
         container.appendChild(div);
       });
 
+      // Sesuaikan waktu berdasarkan kesulitan
+      if (q.difficulty === 'easy') {
+        state.timeLeft = 20;
+      } else if (q.difficulty === 'medium') {
+        state.timeLeft = 30;
+      } else {
+        state.timeLeft = 40;
+      }
+      
       startTimer();
     }
 
     function startTimer() {
       clearInterval(state.timer);
-      state.timeLeft = 30;
-      updateTimerUI(30);
+      const initialTime = state.timeLeft;
+      updateTimerUI(initialTime);
       
       state.timer = setInterval(() => {
         state.timeLeft--;
@@ -1020,7 +1254,12 @@
       const circle = document.querySelector('.progress-ring');
       const r = window.innerWidth < 480 ? 19 : 22;
       const c = 2 * Math.PI * r;
-      const offset = c - ((sec / 30) * c);
+      
+      // Dapatkan waktu awal berdasarkan kesulitan soal saat ini
+      const q = state.questions[state.currentIdx];
+      const initialTime = q.difficulty === 'easy' ? 20 : q.difficulty === 'medium' ? 30 : 40;
+      
+      const offset = c - ((sec / initialTime) * c);
       circle.style.strokeDasharray = c;
       circle.style.strokeDashoffset = offset;
     }
@@ -1032,7 +1271,11 @@
       getEl('options-container').classList.add('locked');
       
       state.answeredCount++;
-      state.totalTime += (30 - state.timeLeft);
+      
+      // Hitung waktu yang digunakan berdasarkan kesulitan
+      const q = state.questions[state.currentIdx];
+      const initialTime = q.difficulty === 'easy' ? 20 : q.difficulty === 'medium' ? 30 : 40;
+      state.totalTime += (initialTime - state.timeLeft);
 
       const items = document.querySelectorAll('.option-item');
       
@@ -1061,7 +1304,10 @@
       getEl('options-container').classList.add('locked');
       
       const q = state.questions[state.currentIdx];
-      document.querySelectorAll('.option-item').forEach(item => {
+      const items = document.querySelectorAll('.option-item');
+      
+      // Tandai jawaban yang benar
+      items.forEach(item => {
         if(item.innerText === q.answer) item.classList.add('correct');
       });
 
@@ -1089,9 +1335,21 @@
       getEl('res-time').textContent = avg + 's';
 
       const pct = (state.score / state.questions.length) * 100;
-      getEl('res-msg').textContent = pct >= 80 ? "Hebat Sekali! Soal sulit tapi kamu jago! 🎉" : 
-                                     (pct >= 60 ? "Lumayan! Soalnya memang sulit! 👍" : 
-                                     "Jangan menyerah! Soalnya memang sulit! 💪");
+      
+      // Pesan berdasarkan tingkat kesulitan yang dipilih
+      if (config.difficulty === 'hard') {
+        getEl('res-msg').textContent = pct >= 70 ? "Luar biasa! Soal sulit tapi kamu menguasai! 🎉" : 
+                                     (pct >= 50 ? "Bagus! Soal tingkat sulit memang menantang! 👍" : 
+                                     "Terus berlatih! Soal sulit butuh lebih banyak praktik! 💪");
+      } else if (config.difficulty === 'medium') {
+        getEl('res-msg').textContent = pct >= 80 ? "Hebat! Kamu menguasai level sedang! 🎉" : 
+                                     (pct >= 60 ? "Bagus! Hasil yang solid! 👍" : 
+                                     "Tingkatkan lagi! Kamu pasti bisa lebih baik! 💪");
+      } else {
+        getEl('res-msg').textContent = pct >= 90 ? "Sempurna! Penguasaan dasar yang kuat! 🎉" : 
+                                     (pct >= 70 ? "Bagus! Dasar sudah dikuasai! 👍" : 
+                                     "Perbanyak latihan dasar! 💪");
+      }
     }
   </script>
 </body>
